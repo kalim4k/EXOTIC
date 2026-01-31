@@ -3,12 +3,14 @@ import { supabase } from '../supabaseClient';
 import { Model } from '../types';
 import { AFRICAN_COUNTRIES, getFlag } from '../data';
 import { Plus, X, Upload, Save, Trash2, Edit2, Loader2, Image as ImageIcon, Database, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface AdminViewProps {
-  onBack: () => void;
+  onBack?: () => void;
 }
 
-const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
+const AdminView: React.FC<AdminViewProps> = ({ onBack: propOnBack }) => {
+  const navigate = useNavigate();
   const [models, setModels] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -166,6 +168,14 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
       alert("Erreur lors de la sauvegarde :\n" + (error.message || "Erreur inconnue"));
     } finally {
       setUploading(false);
+    }
+  };
+
+  const onBack = () => {
+    if (propOnBack) {
+      propOnBack();
+    } else {
+      navigate('/profile');
     }
   };
 

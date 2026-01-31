@@ -2,8 +2,20 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Velvet Models</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Exotic</title>
+    
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#F2F2F7" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Exotic" />
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" href="https://celinaroom.com/wp-content/uploads/2026/01/ChatGPT-Image-31-janv.-2026-01_00_31.png" />
+    <link rel="apple-touch-icon" href="https://celinaroom.com/wp-content/uploads/2026/01/ChatGPT-Image-31-janv.-2026-01_00_31.png" />
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -12,12 +24,14 @@
         height: 100%;
         margin: 0;
         padding: 0;
+        overscroll-behavior-y: none; /* Empêche le rebond élastique sur iOS */
       }
 
       body {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         background-color: #F2F2F7; /* iOS System Gray 6 */
         -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: transparent;
       }
       
       #root {
@@ -25,7 +39,7 @@
       }
       
       .ios-blur {
-        background-color: rgba(255, 255, 255, 0.75);
+        background-color: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
       }
@@ -94,6 +108,11 @@
         animation: liquid-bounce 0.6s ease-out;
         transform-origin: bottom;
       }
+      
+      /* Safe area spacing */
+      .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom);
+      }
 
     </style>
   <script type="importmap">
@@ -103,6 +122,7 @@
     "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
     "react/": "https://esm.sh/react@^19.2.4/",
     "react": "https://esm.sh/react@^19.2.4",
+    "react-router-dom": "https://esm.sh/react-router-dom@6.22.3",
     "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
   }
 }
@@ -111,5 +131,28 @@
   <body>
     <div id="root"></div>
     <script type="module" src="./index.tsx"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+              console.log('SW enregistré:', registration.scope);
+            }, function(err) {
+              console.log('SW échec:', err);
+            });
+        });
+      }
+
+      // Capture de l'événement d'installation pour Chrome/Android
+      window.deferredPrompt = null;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        // Empêcher Chrome d'afficher la bannière standard immédiatement
+        e.preventDefault();
+        // Sauvegarder l'événement pour le déclencher plus tard via notre bouton
+        window.deferredPrompt = e;
+      });
+    </script>
   </body>
 </html>
