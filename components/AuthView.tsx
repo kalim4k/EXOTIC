@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { Loader2, Sparkles, ChevronRight, Lock, Mail, User, Globe, ChevronDown } from 'lucide-react';
+import { Loader2, Sparkles, ChevronRight, Lock, Mail, User, Globe, ChevronDown, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { AFRICAN_COUNTRIES, getFlag } from '../data';
 
 const AuthView: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingVerification, setPendingVerification] = useState(false);
 
   // Form states
   const [email, setEmail] = useState('');
@@ -50,7 +51,27 @@ const AuthView: React.FC = () => {
 
         if (signUpError) throw signUpError;
 
-        // Create Profile Entry manually
+        // Si l'inscription a réussi mais qu'il n'y a pas de session, c'est que la confirmation email est requise
+        if (data.user && !data.session) {
+            // On essaie de créer le profil (peut échouer si RLS strict sans session, mais on priorise l'UI)
+            try {
+                await supabase.from('profiles').insert([
+                    { 
+                        id: data.user.id, 
+                        username: username,
+                        country: country
+                    }
+                ]);
+            } catch (err) {
+                console.log("Profil creation deferred or failed due to RLS, will be handled on trigger or first login");
+            }
+
+            setPendingVerification(true);
+            setLoading(false);
+            return;
+        }
+
+        // Cas fallback si l'email confirm est désactivé (création directe)
         if (data.user) {
             const { error: profileError } = await supabase
                 .from('profiles')
@@ -62,21 +83,65 @@ const AuthView: React.FC = () => {
                     }
                 ]);
             
-            if (profileError) {
-                console.error("Error creating profile:", profileError);
-                if (profileError.code === '23505') { // Unique violation code for Postgres
-                    throw new Error("Ce pseudo est déjà utilisé.");
-                }
+            if (profileError && profileError.code === '23505') {
+                 throw new Error("Ce pseudo est déjà utilisé.");
             }
         }
       }
     } catch (err: any) {
       setError(err.message || "Une erreur est survenue");
     } finally {
-      setLoading(false);
+      if (!pendingVerification) {
+          setLoading(false);
+      }
     }
   };
 
+  // VUE : En attente de vérification Email
+  if (pendingVerification) {
+    return (
+        <div className="min-h-screen bg-[#F2F2F7] flex flex-col items-center justify-center px-6 relative overflow-hidden">
+             {/* Background Decor */}
+            <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-green-300 rounded-full blur-[80px] opacity-30 animate-pulse"></div>
+            
+            <div className="w-full max-w-sm z-10 animate-in fade-in zoom-in-95 duration-500 text-center">
+                <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] shadow-xl border border-white/50 p-8 flex flex-col items-center gap-6">
+                    
+                    <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-2 ring-8 ring-indigo-50/50">
+                        <Mail className="text-indigo-600" size={36} />
+                    </div>
+
+                    <div className="space-y-2">
+                        <h2 className="text-2xl font-bold text-gray-900">Vérifiez vos emails</h2>
+                        <p className="text-sm text-gray-500 leading-relaxed px-2">
+                            Un lien de confirmation a été envoyé à <span className="font-semibold text-gray-800">{email}</span>.
+                        </p>
+                    </div>
+
+                    <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-4 w-full">
+                        <p className="text-xs text-yellow-700 font-medium flex items-start gap-2 text-left">
+                            <span className="text-lg">⚠️</span>
+                            Si vous ne le trouvez pas, vérifiez votre dossier <strong>Spam</strong> ou <strong>Indésirables</strong>.
+                        </p>
+                    </div>
+
+                    <button 
+                        onClick={() => {
+                            setPendingVerification(false);
+                            setIsLogin(true); // Retour au login
+                        }}
+                        className="w-full mt-2 flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-semibold py-3.5 rounded-2xl hover:bg-gray-200 transition-colors active:scale-95"
+                    >
+                        <ArrowLeft size={18} />
+                        <span>Retour à la connexion</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+  }
+
+  // VUE : Login / Signup Classique
   return (
     <div className="min-h-screen bg-[#F2F2F7] flex flex-col items-center justify-center px-6 relative overflow-hidden">
       
