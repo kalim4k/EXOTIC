@@ -2,19 +2,18 @@ import React from 'react';
 import { supabase } from '../supabaseClient';
 import { Construction, MapPin, BadgeCheck, ShieldCheck, LogOut } from 'lucide-react';
 import { UserProfile } from '../types';
-import { useNavigate } from 'react-router-dom';
 
 interface ProfileViewProps {
   userProfile: UserProfile | null;
   session: any;
+  onAdminClick: () => void;
 }
 
-const ProfileView: React.FC<ProfileViewProps> = ({ userProfile, session }) => {
-  const navigate = useNavigate();
+const ProfileView: React.FC<ProfileViewProps> = ({ userProfile, session, onAdminClick }) => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate('/auth');
+    // La redirection est gérée par le listener auth dans App.tsx qui repasse en mode 'auth'
   };
 
   // Check admin access (username 'kalim' OR email 'kalim@gmail.com')
@@ -58,18 +57,10 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userProfile, session }) => {
               <span className="text-2xl">🥉</span>
         </div>
 
-        <div className="px-4 py-3 bg-white rounded-xl shadow-sm border border-gray-100 text-left flex justify-between items-center">
-              <div>
-                <p className="text-xs text-gray-400 font-semibold uppercase mb-0.5">Solde Mission</p>
-                <p className="text-sm font-medium text-gray-900">0 Points</p>
-              </div>
-              <span className="text-2xl">💰</span>
-        </div>
-
         {/* ADMIN BUTTON (Visible for 'kalim' or 'kalim@gmail.com') */}
         {isAdmin && (
           <button 
-            onClick={() => navigate('/admin')}
+            onClick={onAdminClick}
             className="w-full px-4 py-3 bg-gray-900 text-white rounded-xl shadow-sm border border-gray-800 flex justify-between items-center mt-4 transition-transform active:scale-95"
           >
               <div className="flex items-center gap-2">

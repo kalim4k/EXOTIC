@@ -29,18 +29,24 @@ const MissionView: React.FC = () => {
   useEffect(() => {
     const savedData = localStorage.getItem('exotic_mission_progress');
     if (savedData) {
-      const parsed = JSON.parse(savedData);
-      
-      // Check if day has changed to reset daily limit
-      const today = new Date().toDateString();
-      if (parsed.lastDate !== today) {
-        setDailyClicks(0);
-      } else {
-        setDailyClicks(parsed.dailyClicks || 0);
+      try {
+        const parsed = JSON.parse(savedData);
+        
+        // Check if day has changed to reset daily limit
+        const today = new Date().toDateString();
+        if (parsed.lastDate !== today) {
+          setDailyClicks(0);
+        } else {
+          setDailyClicks(parsed.dailyClicks || 0);
+        }
+        
+        setTotalClicks(parsed.totalClicks || 0);
+        setLinkIndex(parsed.linkIndex || 0);
+      } catch (e) {
+        console.error("Erreur lecture sauvegarde mission:", e);
+        // En cas d'erreur de lecture, on reset pour éviter un crash
+        localStorage.removeItem('exotic_mission_progress');
       }
-      
-      setTotalClicks(parsed.totalClicks || 0);
-      setLinkIndex(parsed.linkIndex || 0);
     }
   }, []);
 
@@ -246,7 +252,7 @@ const MissionView: React.FC = () => {
             </div>
             
             <p className="text-xs text-gray-500 leading-tight">
-                Pour débloquer les numéros gratuitement.<br/>
+                Pour débloquer les numéros gratuitement et avoir une 1ere baise gratuite. Vous payer juste le déplacement après la baise.<br/>
             </p>
         </div>
 

@@ -5,15 +5,14 @@ import { modelsData as staticModelsData, getFlag } from '../data';
 import ModelCard from './ModelCard';
 import MissionRequiredModal from './MissionRequiredModal';
 import { Sparkles, Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 interface ModelListViewProps {
   userProfile: UserProfile | null;
   session: any;
+  onGoToMissions: () => void;
 }
 
-const ModelListView: React.FC<ModelListViewProps> = ({ userProfile, session }) => {
-  const navigate = useNavigate();
+const ModelListView: React.FC<ModelListViewProps> = ({ userProfile, session, onGoToMissions }) => {
   const [models, setModels] = useState<Model[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterTab, setFilterTab] = useState<'all' | 'new' | 'popular'>('all');
@@ -71,8 +70,7 @@ const ModelListView: React.FC<ModelListViewProps> = ({ userProfile, session }) =
 
   const handleGoToMissions = () => {
     setIsMissionModalOpen(false);
-    navigate('/mission');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    onGoToMissions();
   };
 
   // LOGIQUE DE LOCALISATION : 

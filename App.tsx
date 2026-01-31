@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import BottomNavigation from './components/BottomNavigation';
 import MissionView from './components/MissionView';
@@ -14,11 +13,15 @@ import { UserProfile } from './types';
 import { Session } from '@supabase/supabase-js';
 import { Loader2 } from 'lucide-react';
 
+type View = 'auth' | 'models' | 'mission' | 'chat' | 'profile' | 'admin';
+
 const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  
+  // Navigation State
+  const [currentView, setCurrentView] = useState<View>('models');
 
   // Manage Auth Session and Fetch Profile
   useEffect(() => {
@@ -37,6 +40,8 @@ const App: React.FC = () => {
       setSession(session);
       if (session) {
         fetchProfile(session.user.id);
+        // Redirect to models on login if we were in auth
+        if (currentView === 'auth') setCurrentView('models');
       } else {
         setUserProfile(null);
         setLoading(false);
@@ -74,49 +79,69 @@ const App: React.FC = () => {
       );
   }
 
+  // Determine actual view to render
+  // If not logged in, force 'auth' view
+  const activeView = !session ? 'auth' : currentView;
+
+  const renderContent = () => {
+    switch (activeView) {
+      case 'auth':
+        return <AuthView />;
+      case 'models':
+        return (
+          <ModelListView 
+            userProfile={userProfile} 
+            session={session} 
+            onGoToMissions={() => {
+              setCurrentView('mission');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        );
+      case 'mission':
+        return <MissionView />;
+      case 'chat':
+        return <ChatView onDiscover={() => setCurrentView('models')} />;
+      case 'profile':
+        return (
+          <ProfileView 
+            userProfile={userProfile} 
+            session={session} 
+            onAdminClick={() => setCurrentView('admin')}
+          />
+        );
+      case 'admin':
+        return <AdminView onBack={() => setCurrentView('profile')} />;
+      default:
+        return <ModelListView userProfile={userProfile} session={session} onGoToMissions={() => setCurrentView('mission')} />;
+    }
+  };
+
   return (
     <>
-      <Routes>
-        {/* Route publique : Auth */}
-        <Route path="/auth" element={!session ? <AuthView /> : <Navigate to="/models" replace />} />
+      <div className="min-h-screen bg-[#F2F2F7]">
+        {/* Header (Hidden on Auth and Admin pages) */}
+        {activeView !== 'auth' && activeView !== 'admin' && <Header />}
         
-        {/* Routes Protégées (Layout Principal) */}
-        <Route element={<ProtectedLayout session={session} />}>
-            <Route path="/" element={<Navigate to="/models" replace />} />
-            <Route path="/models" element={<ModelListView userProfile={userProfile} session={session} />} />
-            <Route path="/mission" element={<MissionView />} />
-            <Route path="/chat" element={<ChatView onDiscover={() => navigate('/models')} />} />
-            <Route path="/profile" element={<ProfileView userProfile={userProfile} session={session} />} />
-        </Route>
+        <main className={`max-w-7xl mx-auto ${activeView !== 'auth' && activeView !== 'admin' ? 'pb-28' : ''}`}>
+           {renderContent()}
+        </main>
 
-        {/* Route Admin (Protégée mais sans le layout standard si désiré, ou avec) */}
-        {/* Ici on le met hors du layout principal pour avoir le plein écran comme avant */}
-        <Route path="/admin" element={session ? <AdminView onBack={() => navigate('/profile')} /> : <Navigate to="/auth" replace />} />
-        
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+        {/* Bottom Nav (Hidden on Auth and Admin pages) */}
+        {activeView !== 'auth' && activeView !== 'admin' && (
+          <BottomNavigation 
+            currentView={activeView} 
+            onChange={(view) => {
+              setCurrentView(view as View);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }} 
+          />
+        )}
+      </div>
       
       <InstallPWA />
     </>
   );
-};
-
-// Layout component pour les pages connectées avec Header et BottomNav
-const ProtectedLayout: React.FC<{ session: Session | null }> = ({ session }) => {
-    if (!session) {
-        return <Navigate to="/auth" replace />;
-    }
-
-    return (
-        <div className="min-h-screen bg-[#F2F2F7]">
-            <Header />
-            <main className="max-w-7xl mx-auto pb-28">
-                <Outlet />
-            </main>
-            <BottomNavigation />
-        </div>
-    );
 };
 
 export default App;
