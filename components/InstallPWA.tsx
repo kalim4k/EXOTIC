@@ -85,7 +85,7 @@ const InstallPWA: React.FC = () => {
             <img 
                 src="https://celinaroom.com/wp-content/uploads/2026/01/ChatGPT-Image-31-janv.-2026-01_00_31.png" 
                 alt="App Icon" 
-                className="w-14 h-14 rounded-[14px] shadow-sm object-cover"
+                className="w-14 h-14 rounded-2xl shadow-sm object-cover ring-1 ring-black/10"
             />
         </div>
 

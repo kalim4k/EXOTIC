@@ -10,12 +10,14 @@
     {
       "src": "https://celinaroom.com/wp-content/uploads/2026/01/ChatGPT-Image-31-janv.-2026-01_00_31.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "https://celinaroom.com/wp-content/uploads/2026/01/ChatGPT-Image-31-janv.-2026-01_00_31.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
