@@ -164,7 +164,7 @@ const App: React.FC = () => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2 text-indigo-600 font-semibold text-sm uppercase tracking-wider">
                   <Sparkles size={16} />
-                  <span>Exclusivité {userProfile?.country ? ` - ${userProfile.country}` : ''}</span>
+                  <span>Exclusivité {userProfile?.country ? ` - ${getFlag(userProfile.country)} ${userProfile.country}` : ''}</span>
                 </div>
 
                 {/* Badge Compteur En Ligne */}
