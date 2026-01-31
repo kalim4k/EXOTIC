@@ -88,7 +88,8 @@ const App: React.FC = () => {
             id: item.id.toString(),
             name: item.name,
             country: item.country,
-            flag: item.flag,
+            // Fallback: Si le drapeau est null en BDD, on le génère via le helper getFlag
+            flag: item.flag || getFlag(item.country),
             imageUrl: item.image_url,
             phoneNumber: item.phone_number,
             isOnline: item.is_online,

@@ -12,17 +12,62 @@ export const AFRICAN_COUNTRIES = [
   "Togo"
 ].sort();
 
-// Helper pour les drapeaux
-export const getFlag = (country: string) => {
-  const flags: Record<string, string> = {
-    "Bénin": "🇧🇯", "Burkina Faso": "🇧🇫", "Cameroun": "🇨🇲", 
-    "Côte d'Ivoire": "🇨🇮", "Gabon": "🇬🇦", "Mali": "🇲🇱", 
-    "Niger": "🇳🇪", "Sénégal": "🇸🇳", "Togo": "🇹🇬",
-    // Fallbacks pour les données statiques existantes si besoin
-    "France": "🇫🇷", "Espagne": "🇪🇸", "Brésil": "🇧🇷", 
-    "Maroc": "🇲🇦", "Russie": "🇷🇺", "UK": "🇬🇧"
+// Helper pour obtenir le code ISO du pays (pour les images de drapeaux)
+export const getCountryCode = (country: string): string => {
+  if (!country) return "un"; // un = United Nations (générique)
+  
+  const normalized = country.trim().toLowerCase();
+  
+  const codes: Record<string, string> = {
+    "bénin": "bj", "benin": "bj",
+    "burkina faso": "bf", "burkina": "bf",
+    "cameroun": "cm", "cameroon": "cm",
+    "côte d'ivoire": "ci", "cote d'ivoire": "ci", "ivory coast": "ci",
+    "gabon": "ga", 
+    "mali": "ml", 
+    "niger": "ne", 
+    "sénégal": "sn", "senegal": "sn",
+    "togo": "tg",
+    
+    // Reste du monde
+    "france": "fr", 
+    "espagne": "es", "spain": "es",
+    "brésil": "br", "brazil": "br",
+    "maroc": "ma", "morocco": "ma",
+    "russie": "ru", "russia": "ru",
+    "uk": "gb", "united kingdom": "gb", "royaume-uni": "gb",
+    "usa": "us", "états-unis": "us"
   };
-  return flags[country] || "🌍";
+  
+  return codes[normalized] || "un";
+};
+
+// Helper pour les drapeaux (Emoji fallback)
+export const getFlag = (country: string) => {
+  if (!country) return "🌍";
+  
+  const normalizedCountry = country.trim().toLowerCase();
+  
+  const flags: Record<string, string> = {
+    "bénin": "🇧🇯", "benin": "🇧🇯",
+    "burkina faso": "🇧🇫", "burkina": "🇧🇫",
+    "cameroun": "🇨🇲", "cameroon": "🇨🇲",
+    "côte d'ivoire": "🇨🇮", "cote d'ivoire": "🇨🇮", "ivory coast": "🇨🇮",
+    "gabon": "🇬🇦", 
+    "mali": "🇲🇱", 
+    "niger": "🇳🇪", 
+    "sénégal": "🇸🇳", "senegal": "🇸🇳",
+    "togo": "🇹🇬",
+    
+    "france": "🇫🇷", 
+    "espagne": "🇪🇸", "spain": "🇪🇸",
+    "brésil": "🇧🇷", "brazil": "🇧🇷",
+    "maroc": "🇲🇦", "morocco": "🇲🇦",
+    "russie": "🇷🇺", "russia": "🇷🇺",
+    "uk": "🇬🇧", "united kingdom": "🇬🇧", "royaume-uni": "🇬🇧"
+  };
+  
+  return flags[normalizedCountry] || "🌍";
 };
 
 export const modelsData: Model[] = [

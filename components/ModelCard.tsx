@@ -1,6 +1,7 @@
 import React from 'react';
 import { Model } from '../types';
 import { MessageCircle, Tag } from 'lucide-react';
+import { getCountryCode } from '../data';
 
 interface ModelCardProps {
   model: Model;
@@ -8,6 +9,10 @@ interface ModelCardProps {
 }
 
 const ModelCard: React.FC<ModelCardProps> = ({ model, onContactClick }) => {
+  // Récupération du code ISO (ex: "cm" pour Cameroun) pour l'URL du drapeau
+  const countryCode = getCountryCode(model.country);
+  const flagUrl = `https://flagcdn.com/w40/${countryCode}.png`;
+
   return (
     <div className="flex flex-col gap-3 group">
       {/* Photo Container */}
@@ -29,12 +34,28 @@ const ModelCard: React.FC<ModelCardProps> = ({ model, onContactClick }) => {
 
         {/* Content on Image */}
         <div className="absolute bottom-0 left-0 w-full p-3 text-white">
-          <h3 className="text-lg font-bold tracking-tight leading-none mb-1">
+          <h3 className="text-xl font-bold tracking-tight leading-none mb-1.5">
             {model.name}
           </h3>
-          <div className="flex items-center gap-1.5 text-xs font-medium text-white/90 bg-white/20 backdrop-blur-md w-fit px-2 py-1 rounded-full">
-            <span>{model.flag}</span>
-            <span className="uppercase tracking-wide opacity-90">{model.country}</span>
+          
+          {/* Flag (Image) and Country - Fixes Windows Emoji Issue */}
+          <div className="flex items-center gap-2 opacity-95">
+            <img 
+                src={flagUrl} 
+                alt={`Drapeau ${model.country}`}
+                className="w-5 h-auto rounded-[2px] shadow-sm object-cover"
+                onError={(e) => {
+                    // Fallback si l'image ne charge pas (ex: pays inconnu), on remet l'emoji ou globe
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+            />
+            {/* Fallback emoji caché par défaut, visible si erreur img */}
+            <span className="hidden text-lg leading-none">{model.flag}</span>
+
+            <span className="text-xs font-semibold uppercase tracking-wide text-shadow-sm">
+              {model.country}
+            </span>
           </div>
         </div>
       </div>
