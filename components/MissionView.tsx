@@ -252,7 +252,7 @@ const MissionView: React.FC = () => {
             </div>
             
             <p className="text-xs text-gray-500 leading-tight">
-                Pour débloquer les numéros gratuitement et avoir une 1ere baise gratuite. Vous payer juste le déplacement après la baise.<br/>
+                Pour débloquer les numéros gratuitement.<br/>
             </p>
         </div>
 
