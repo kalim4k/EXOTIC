@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { Loader2, Sparkles, ChevronRight, Lock, Mail, User, Globe, ChevronDown, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Loader2, Sparkles, ChevronRight, Lock, Mail, User, Globe, ChevronDown, ArrowLeft, X } from 'lucide-react';
 import { AFRICAN_COUNTRIES, getFlag } from '../data';
 
-const AuthView: React.FC = () => {
-  const [isLogin, setIsLogin] = useState(true);
+interface AuthViewProps {
+    onBack?: () => void;
+}
+
+const AuthView: React.FC<AuthViewProps> = ({ onBack }) => {
+  const [isLogin, setIsLogin] = useState(false); // Default to signup for new users coming from landing
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pendingVerification, setPendingVerification] = useState(false);
@@ -53,7 +57,6 @@ const AuthView: React.FC = () => {
 
         // Si l'inscription a réussi mais qu'il n'y a pas de session, c'est que la confirmation email est requise
         if (data.user && !data.session) {
-            // On essaie de créer le profil (peut échouer si RLS strict sans session, mais on priorise l'UI)
             try {
                 await supabase.from('profiles').insert([
                     { 
@@ -71,7 +74,7 @@ const AuthView: React.FC = () => {
             return;
         }
 
-        // Cas fallback si l'email confirm est désactivé (création directe)
+        // Cas fallback si l'email confirm est désactivé
         if (data.user) {
             const { error: profileError } = await supabase
                 .from('profiles')
@@ -152,7 +155,16 @@ const AuthView: React.FC = () => {
       <div className="w-full max-w-sm z-10 animate-in fade-in zoom-in-95 duration-500">
         
         {/* Header */}
-        <div className="text-center mb-8 space-y-2">
+        <div className="relative text-center mb-8 space-y-2">
+          {onBack && (
+              <button 
+                onClick={onBack}
+                className="absolute left-0 top-0 p-2 -ml-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                  <ArrowLeft size={24} />
+              </button>
+          )}
+
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-lg mb-2">
             <Sparkles className="text-indigo-600" size={32} />
           </div>
@@ -275,7 +287,7 @@ const AuthView: React.FC = () => {
                 <Loader2 className="animate-spin" size={20} />
               ) : (
                 <>
-                  <span>{isLogin ? 'Se connecter' : "S'inscrire"}</span>
+                  <span>{isLogin ? 'Se connecter' : "S'inscrire gratuitement"}</span>
                   <ChevronRight size={16} className="opacity-80" />
                 </>
               )}
@@ -296,7 +308,7 @@ const AuthView: React.FC = () => {
             }}
             className="mt-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
           >
-            {isLogin ? "Créer un compte gratuitement" : "Connectez-vous ici"}
+            {isLogin ? "Créer un compte maintenant" : "Connectez-vous ici"}
           </button>
         </div>
 
